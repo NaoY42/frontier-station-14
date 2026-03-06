@@ -211,10 +211,12 @@
   components:
   - type: StorageFill
     contents:
-        - id: InflatableWallStack
+        - id: NFInflatableWallStack # Frontier: InflatableWallStack<NFInflatableWallStack
           amount: 2
-        - id: InflatableDoorStack
-          amount: 2
+        - id: NFInflatableDoorStack5 # Frontier: InflatableDoorStack<NFInflatableDoorStack5
+          amount: 1 # Frontier: 2<1
+        - id: NFInflatableWindowStack # Frontier
+          amount: 1 # Frontier
   - type: Sprite
     layers:
       - state: box

@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using Content.Server._NF.Shuttles.Components; // Frontier: FTL knockdown immunity
+using Content.Shared._NF.Atmos.Components; // Frontier
 using Content.Server.Shuttles.Components;
 using Content.Server.Shuttles.Events;
 using Content.Server.Station.Events;
@@ -142,6 +143,8 @@ public sealed partial class ShuttleSystem
         var mapUid = _mapSystem.CreateMap(out var mapId);
         var ftlMap = AddComp<FTLMapComponent>(mapUid);
 
+        EnsureComp<AtmosEnabledMapComponent>(mapUid); // Frontier
+
         _metadata.SetEntityName(mapUid, "FTL");
         Log.Debug($"Setup hyperspace map at {mapUid}");
         DebugTools.Assert(!_mapSystem.IsPaused(mapId));
@@ -242,7 +245,7 @@ public sealed partial class ShuttleSystem
         {
 
             // Too large to FTL
-            if (FTLMassLimit > 0 &&  shuttlePhysics.Mass > FTLMassLimit)
+            if (FTLMassLimit > 0 && shuttlePhysics.Mass > FTLMassLimit)
             {
                 reason = Loc.GetString("shuttle-console-mass");
                 return false;
@@ -634,11 +637,8 @@ public sealed partial class ShuttleSystem
         {
             foreach (var child in toKnock)
             {
-                if (!_statusQuery.TryGetComponent(child, out var status))
-                    continue;
-
                 if (!HasComp<FTLKnockdownImmuneComponent>(child)) // Frontier: FTL knockdown immunity
-                    _stuns.TryParalyze(child, _hyperspaceKnockdownTime, true, status);
+                    _stuns.TryUpdateParalyzeDuration(child, _hyperspaceKnockdownTime);
 
                 // If the guy we knocked down is on a spaced tile, throw them too
                 if (grid != null)
@@ -698,7 +698,7 @@ public sealed partial class ShuttleSystem
         // only toss if its on lattice/space
         var tile = _mapSystem.GetTileRef(shuttleEntity, shuttleGrid, childXform.Coordinates);
 
-        if (!tile.IsSpace(_tileDefManager))
+        if (!_turf.IsSpace(tile))
             return;
 
         var throwDirection = childXform.LocalPosition - shuttleBody.LocalCenter;
@@ -718,7 +718,7 @@ public sealed partial class ShuttleSystem
         ShuttleComponent component,
         EntityUid targetUid,
         string? priorityTag = null,
-        DockType dockType = DockType.Airlock) // Frontier
+        DockType dockType = DockType.None) // Frontier
     {
         return TryFTLDock(shuttleUid, component, targetUid, out _, priorityTag, dockType); // Frontier: add dockType
     }
@@ -733,7 +733,7 @@ public sealed partial class ShuttleSystem
         EntityUid targetUid,
         [NotNullWhen(true)] out DockingConfig? config,
         string? priorityTag = null,
-        DockType dockType = DockType.Airlock) // Frontier
+        DockType dockType = DockType.None) // Frontier
     {
         config = null;
 

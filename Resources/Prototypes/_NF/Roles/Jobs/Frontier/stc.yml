@@ -24,6 +24,8 @@
   - Frontier
   - StationTrafficController
   special:
+  - !type:AddImplantSpecial
+    implants: [ MindShieldImplant, TrackingImplant ]
   - !type:GiveItemOnHolidaySpecial
     holiday: FrontierBirthday
     prototype: FrontierBirthdayGift
@@ -36,10 +38,10 @@
     back:
     - Flash
     - RubberStampStc
-    - EncryptionKeyStationMaster
+    - BoxFolderStc
     - ShipVoucherFrontierStc
   encryptionKeys:
-  - BoxFolderStc
+  - EncryptionKeyStationMaster
 
 - type: chameleonOutfit
   id: StationTrafficControllerChameleonOutfit
